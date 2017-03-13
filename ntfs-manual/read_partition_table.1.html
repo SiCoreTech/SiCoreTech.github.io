@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>read_partition_table(1) - read the partition table of a disk</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#RETURN-VALUE">RETURN VALUE</a>
+    <a href="#NOTES">NOTES</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>read_partition_table(1)</li>
+    <li class='tc'></li>
+    <li class='tr'>read_partition_table(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>read_partition_table</code> - <span class="man-whatis">read the partition table of a disk</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><strong>#include &lt;partition_table.h></strong>          /* See NOTES */</p>
+
+<p><strong>void read_partition_table(char * <em>disk</em>)</strong>;</p>
+
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>read_partition_table()</strong> reads MBR, MBR extended, and GPT boot records. Stores partition information in global array <em>struct pte * ptes[]</em>. <em>struct pte</em> is defined in <em>partition_table.h</em> as:</p>
+
+<pre><code class="c ">struct pte {
+  struct partition *part_table;   /* points into sectorbuffer */
+  struct partition *ext_pointer;    /* points into sectorbuffer */
+  char changed;                       /* boolean */
+  unsigned long long offset;        /* disk sector number */
+  unsigned char *sectorbuffer;    /* disk sector contents */
+  unsigned long end;              /* end lba of partition */
+  unsigned long long start;       /* start lba of partition */
+  unsigned long long size;        /* partition size in sectors */
+  unsigned int sys_ind;           /* system indicator */
+  int is_microsoft_basic_data;    /* boolean */
+};
+</code></pre>
+
+<p>The <em>struct partition *</em> is used in <strong>read_partition_table()</strong> and its subroutine <strong>read_extended()</strong> to manipulate sector data in buffers.  This struct is defined in <em>partition_table.h</em> as:</p>
+
+<pre><code class="c">struct partition {
+  unsigned char boot_ind;         /* 0x80 - active */
+  unsigned char head;             /* starting head */
+  unsigned char sector;           /* starting sector */
+  unsigned char cyl;              /* starting cylinder */
+  unsigned char sys_ind;          /* What partition type */
+  unsigned char end_head;         /* end head */
+  unsigned char end_sector;       /* end sector */
+  unsigned char end_cyl;          /* end cylinder */
+  unsigned char start4[4];        /* starting sector counting from 0 */
+  unsigned char size4[4];         /* nr of sectors in partition */
+} PACKED;
+</code></pre>
+
+<p>The <em>disk</em> argument specifies the disk device to read when running <em>read_partition_table</em> on x86 Ubuntu development machine.  When run on the SATA Mediator and compiled with <strong>-DSATA_MEDIATOR</strong> the <em>disk</em> argument should be NULL.</p>
+
+<h2 id="RETURN-VALUE">RETURN VALUE</h2>
+
+<p>This routine has no return value.  If there is an error <em>exit()</em> will be called with the value <strong>EXIT_FAILURE</strong> and the main thread will be aborted.</p>
+
+<h2 id="NOTES">NOTES</h2>
+
+<p>All headers for the SATA NTFS project can be found in the include directory in the project repo. Compile with <strong>-I./include/</strong></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>March 2017</li>
+    <li class='tr'>read_partition_table(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
