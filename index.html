@@ -1,10 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title></title>
+<meta charset="UTF-8">
+<style>
+:root {
+  --orange: #ff9900;
+}
+body {
+  background-color: var(--orange);
+}
+#body {
+  width: 700px;
+  height: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border: solid black;
+  border-radius: 10px;
+  background-color: #b0b0b0;
+  font-family: Century Gothic, sans-serif;
+}
+#content {
+  width: 400px;
+  height: 300px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  text-indent: -25px;
+  font-family: Century Gothic, sans-serif;
+}
+#footer {
+  width: 600px;
+  height: 100px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  text-indent: -25px;
+  font-family: Century Gothic, sans-serif;
+  background-color: white;
+  border: solid black;
+  border-radius: 10px;
+  position: relative;
+  bottom: 0px;
+  clear: both;
+}
+a {
+  text-decoration: underline;
+  font-family: Century Gothic, sans-serif;
+  font-size: 125%;
+  color: white;
+}
+ul {
+  list-style-type: none;
+}
+a:hover {
+  color: var(--orange);
+}
+.footer-link {
+  color: #b3b3b3;
+  font-size:100%;
+  text-decoration: underline;
+}
+</style>
+<title></title>
 </head>
 <body>
-<h1>SiCore Tech Documentation</h1>
+<div id="body">
+  <h1>SiCore Tech Documentation</h1>
+  <div id="content">
+    <ul>
+      <li><a href="ntfs-manual/index.html">SATA Mediator NTFS Firmware Manual</a></li>
+    </ul>
+  </div>
+  <div id="footer">
+   <ul>
+      <li>WebSite: <a class="footer-link" href="Sicore-tech.com">www.sicore-tech.com</a></li>
+      <li>Email: <a class="footer-link" href="mailto:info@sicore-tech.com">info@sicore-tech.com</a></li>
+      <li>GitHub: <a class="footer-link" href="https://github.com/SiCoreTech">@sicoretech</a></li>
+      <li>Location: <a class="footer-link" href="https://www.google.com/maps/place/200+Finn+Ct,+Farmingdale,+NY+11735/@40.758466,-73.4092167,17z/data=!3m1!4b1!4m5!3m4!1s0x89e82baf9b59a715:0x8fca44d679a5cdbe!8m2!3d40.758466!4d-73.407028!6m1!1e1">200 Finn Court, Farmingdale, NY, 11735</a></li>
+    </ul>
+  </div>
+</div>
 </body>
 </html>
