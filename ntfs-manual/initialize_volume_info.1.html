@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>initialize_volume_info(1) - read Volume Boot Record of an NTFS partition and initialize volume info macros  </title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#RETURN-VALUE">RETURN VALUE</a>
+    <a href="#NOTES">NOTES</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>initialize_volume_info(1)</li>
+    <li class='tc'></li>
+    <li class='tr'>initialize_volume_info(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>initialize_volume_info</code> - <span class="man-whatis">read Volume Boot Record of an NTFS partition and initialize volume info macros  </span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><strong>#include &lt;volume_info.h></strong>          /* See NOTES */</p>
+
+<p><strong>int initialize_volume_info(unsigned long long <em>lba_of_first_sector</em>);</strong></p>
+
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>initialize_volume_info()</strong> reads the Volume Boot Record located at the first sector of an NTFS formatted partition.  Stores information in the <em>struct VBR * volume_info</em> which is defined in <em>volume_info_types.h</em> :</p>
+
+<pre><code class="c">struct VBR {
+    unsigned char  jump[3];               /* Irrelevant (jump to boot up code).*/
+    unsigned long long oem_id;          /* Magic "NTFS    ". */
+    Bios_Parameter_Block bpb;           /* See BIOS_PARAMETER_BLOCK. */
+    unsigned char  unused[4];             /* zero, NTFS diskedit.exe states that
+                                                      this is actually:
+                                                        __u8 physical_drive;    // 0x80
+                                                        __u8 current_head;  // zero
+                                                        __u8 extended_boot_signature;
+                                                          // 0x80
+                                                        __u8 unused;        // zero
+                                                      */
+    unsigned long long number_of_sectors;   /* Number of sectors in volume. Gives
+                                                                maximum volume size of 2^63 sectors.
+                                                                Assuming standard sector size of 512
+                                                                bytes, the maximum byte size is
+                                                                approx. 4.7x10^21 bytes. (-; */
+    unsigned long long mft_lcn;                 /* Cluster location of mft data. */
+    unsigned long long mftmirr_lcn;             /* Cluster location of copy of mft. */
+    char               clusters_per_mft_record;     /* Mft record size in clusters. */
+    unsigned char  reserved0[3];                        /* zero */
+    unsigned char  clusters_per_index_record;       /* Index block size in clusters. */
+    unsigned char  reserved1[3];                          /* zero */
+    unsigned long long volume_serial_number;        /* Irrelevant (serial number). */
+    unsigned int checksum;                                  /* Boot sector checksum. */
+    unsigned char  bootstrap[426];                      /* Irrelevant (boot up code). */
+    unsigned short end_of_sector_marker;              /* End of bootsector magic. Always is
+                                                                        0xaa55 in little endian. */
+                                                /* sizeof() = 512 (0x200) bytes */
+};
+</code></pre>
+
+<p>The <em>Bios_Parameter_Block</em> contains information pertaining to the physical details of the disk as well as the location of the Master File Table (MFT). As defined in <em>volume_info_types.h</em> :</p>
+
+<pre><code class="c">typedef struct {
+    unsigned short bytes_per_sector;          /* Size of a sector in bytes. */
+    unsigned char  sectors_per_cluster;     /* Size of a cluster in sectors. */
+    unsigned short reserved_sectors;          /* zero */
+    unsigned char  fats;                            /* zero */
+    unsigned short root_entries;                /* zero */
+    unsigned short sectors;                       /* zero */
+    unsigned char  media_type;                  /* 0xf8 = hard disk */
+    unsigned short sectors_per_fat;           /* zero */
+    unsigned short sectors_per_track;         /* irrelevant */
+    unsigned short heads;                           /* irrelevant */
+    unsigned int   hidden_sectors;            /* zero */
+    unsigned int   large_sectors;               /* zero */
+} Bios_Parameter_Block;
+</code></pre>
+
+<p>Once  <em>initialize_volume_info()</em> is called, the information stored in <em>volume_info</em> as well as other important information pertaining to the partition, can be accessed using the following global macros:</p>
+
+<p><strong>SECTOR_SIZE</strong>
+the disk's sector size in bytes (usually 512)</p>
+
+<p><strong>CLUSTER_SIZE_IN_SECTORS</strong>
+how many sectors make up a cluster within the partition (usually 8)</p>
+
+<p><strong>CLUSTER_SIZE_IN_BYTES</strong>
+how many bytes in a cluster</p>
+
+<p><strong>FILE_RECORD_SIZE_IN_CLUSTERS</strong>
+how many clusters make up a file record.  If less than 1 (which is usually the case) this will return the value 0xF6 or -10</p>
+
+<p><strong>FILE_RECORD_SIZE_IN_SECTORS</strong>
+how many sectors make up a file record (normally 2)</p>
+
+<p><strong>FILE_RECORD_SIZE_IN_BYTES</strong>
+the size of a file record in bytes</p>
+
+<p><strong>MFT_LCN</strong>
+the Logical Cluster Number of the first entry in the Master File Table, also called $MFT.  The Logical Cluster Number corresponds to the offset in clusters from the beginning of the first sector in the partition.</p>
+
+<p><strong>MFT_LBA</strong>
+the location of the first entry in the MFT represented as a Logical Block Address.</p>
+
+<p>One last useful macro is <strong>LCN_TO_LBA</strong> which takes any Logical Cluster Number and converts into to a Logical Block Address</p>
+
+<h2 id="RETURN-VALUE">RETURN VALUE</h2>
+
+<p>On success <em>initialize_volume_info()</em> returns 0.  If a non-NTFS partition is passed as an argument, -1 is returned.</p>
+
+<h2 id="NOTES">NOTES</h2>
+
+<p>All headers for the SATA NTFS project can be found in the include directory in the project repo. Compile with <strong>-I./include/</strong>.</p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>March 2017</li>
+    <li class='tr'>initialize_volume_info(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
