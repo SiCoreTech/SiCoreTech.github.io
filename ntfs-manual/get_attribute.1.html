@@ -62,7 +62,7 @@
 
   <ol class='man-decor man-head man head'>
     <li class='tl'>get_attribute(1)</li>
-    <li class='tc'></li>
+    <li class='tc'>SATA Mediator NTFS Firmware Manual</li>
     <li class='tr'>get_attribute(1)</li>
   </ol>
 
@@ -133,7 +133,7 @@ typedef struct {
 
 <p>On success <em>get_attribute()</em> returns an <em>attribute</em> union containing <em>attribute_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL and errno is set with the following value :</p>
 
-<p><strong>EBABF</strong>
+<p><strong>EBADF</strong>
 <em>file_entry</em> is not a valid NTFS file record or is not initialized properly</p>
 
 <p><strong>ENOMEM</strong> memory allocation failure</p>
@@ -144,7 +144,7 @@ typedef struct {
 
 
   <ol class='man-decor man-foot man foot'>
-    <li class='tl'></li>
+    <li class='tl'>SiCore Technologies Inc.</li>
     <li class='tc'>March 2017</li>
     <li class='tr'>get_attribute(1)</li>
   </ol>
