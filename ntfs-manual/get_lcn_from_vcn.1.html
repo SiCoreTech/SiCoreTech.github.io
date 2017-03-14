@@ -62,7 +62,7 @@
 
   <ol class='man-decor man-head man head'>
     <li class='tl'>get_lcn_from_vcn(1)</li>
-    <li class='tc'></li>
+    <li class='tc'>SATA Mediator NTFS Firmware Manual</li>
     <li class='tr'>get_lcn_from_vcn(1)</li>
   </ol>
 
@@ -77,7 +77,8 @@
 
 <p><strong>long long get_lcn_from_vcn(<em>runlist r</em>, unsigned long long <em>vcn</em>);</strong></p>
 
-<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.
+<strong>Depends upon the initialization of Volume Info macros and must be preceded by a call to <em>initialize_volume_info()</em></strong>.</p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
@@ -93,7 +94,7 @@
 
 
   <ol class='man-decor man-foot man foot'>
-    <li class='tl'>SiCore-Tech</li>
+    <li class='tl'>SiCore Technologies Inc.</li>
     <li class='tc'>March 2017</li>
     <li class='tr'>get_lcn_from_vcn(1)</li>
   </ol>
