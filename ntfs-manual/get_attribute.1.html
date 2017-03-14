@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>get_attribute(1) - searches NTFS File Record for an NTFS attribute with a specific type id and reads it</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#RETURN-VALUE">RETURN VALUE</a>
+    <a href="#NOTES">NOTES</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>get_attribute(1)</li>
+    <li class='tc'></li>
+    <li class='tr'>get_attribute(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>get_attribute</code> - <span class="man-whatis">searches NTFS File Record for an NTFS attribute with a specific type id and reads it</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><strong>#include &lt;file_entry.h></strong>          /* See NOTES */</p>
+
+<p><strong>attribute get_attribute(file_entry <em>file</em>, unsigned int <em>type_id</em>);</strong></p>
+
+<p><strong>void free_attribute(attribute <em>a</em>);</strong></p>
+
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>get_attribute()</strong> searches the NTFS File Record referred to by <em>file_entry</em> file for the NTFS attribute with a type id matching <em>unsigned int_type</em> id and stores the corresponding bytes in the union <em>attribute</em> which it then returns. The <em>attribute</em> is defined in <em>file_entry.h</em> :</p>
+
+<pre><code class="c">typedef union {
+  attribute_header * header;
+  unsigned char * content;
+} attribute;
+</code></pre>
+
+<p>The <em>attribute_header</em> struct represents an NTFS attribute header for either non-resident or resident attributes using an anonymous union between structs representing resident and non-resident headers :</p>
+
+<pre><code class="c">typedef struct {
+  unsigned int size_of_content;
+  unsigned short offset_to_content;
+  unsigned short padding;
+} resident_header;
+
+typedef struct {
+  unsigned long long start_vcn;         // 16 - starting VCN of this attribute
+  unsigned long long last_vcn;          // 24
+  unsigned short offset_to_runlist_data;                // 32 - offset data runs (after name) u_short compusize;   
+  unsigned short f1;                    // 36
+  unsigned int padding;
+  unsigned long long alen;              // 40   allocated size of stream
+  unsigned long long ssize;             // 48   actual size of stream
+  unsigned long long initsize;          // 56   initialized steam size
+} non_resident_header;
+
+typedef struct {
+  unsigned int type_id;
+  unsigned int length;                      // 4 - length including header
+  unsigned char non_res_flag;               // 8 - resident flag
+  unsigned char name_length;                // 9 - name length
+  unsigned short name_offset;               // 10 - offset to name 
+  unsigned short flags;                     // 12  
+  unsigned short id;                        // 14 - unique identifier
+  union {                             // anonymous union
+    resident_header res;
+    non_resident_header non_res;
+  };
+} attribute_header;
+</code></pre>
+
+<p>Each call to <em>get_attribute()</em> allocates memory for the <em>attribute_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS attribute (specified in the generic portion of the header).</p>
+
+<p>This memory can then be freed by calling <strong>free_attribute()</strong>.</p>
+
+<h2 id="RETURN-VALUE">RETURN VALUE</h2>
+
+<p>On success <em>get_attribute()</em> returns an <em>attribute</em> union containing <em>attribute_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL and errno is set with the following value :</p>
+
+<p><strong>EBABF</strong>
+<em>file_entry</em> is not a valid NTFS file record or is not initialized properly</p>
+
+<p><strong>ENOMEM</strong> memory allocation failure</p>
+
+<h2 id="NOTES">NOTES</h2>
+
+<p>All headers for the SATA NTFS project can be found in the include directory in the project repo. Compile with <strong>-I./include/</strong></p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>March 2017</li>
+    <li class='tr'>get_attribute(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
