@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>get_file_entry(1) - read NTFS file record at MFT address </title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#RETURN-VALUE">RETURN VALUE</a>
+    <a href="#NOTES">NOTES</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>get_file_entry(1)</li>
+    <li class='tc'>NTFS Manual</li>
+    <li class='tr'>get_file_entry(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>get_file_entry</code> - <span class="man-whatis">read NTFS file record at MFT address </span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><strong>#include &lt;file_entry.h></strong>          /* See NOTES */</p>
+
+<p><strong>file_entry get_file_entry(unsigned long long <em>mft_address</em>);</strong></p>
+
+<p><strong>void free_file_entry(file_entry <em>file</em>);</strong></p>
+
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>get_file_entry()</strong> reads the sectors corresponding to the NTFS file record at the <em>mft_address</em> and returns the <em>file_entry</em> union defined in <em>file_entry.h</em> :</p>
+
+<pre><code class="c">typedef union {
+  file_header * header;
+  unsigned char * content;
+} file_entry;
+</code></pre>
+
+<p>The <em>file_header</em> struct represents the NTFS file record header and is also defined in <em>file_entry.h</em>.</p>
+
+<pre><code class="c">typedef struct file_header {
+  unsigned char magic_signature[4];
+  unsigned short update_seq_offset;
+  unsigned short size_seq_number_array; 
+  unsigned long long LSN;
+  unsigned short seq_number;
+  unsigned short hard_link_count;
+  unsigned short first_attr_offset;
+  unsigned short flags;
+  unsigned int used_file_record_size;
+  unsigned int allocated_file_record_size;
+  unsigned long long file_ref_to_base_file_rec;
+  unsigned short next_attr_id;
+  unsigned short align;
+} file_header;
+</code></pre>
+
+<p>Each call to <em>get_file_entry()</em> allocates memory for the <em>file_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initialize the <em>unsigned char * content</em> member of the union to the size of the NTFS file record which is obtained using the <strong>FILE_RECORD_SIZE_IN_BYTES</strong> macro defined in <em>volume_info.h</em>.</p>
+
+<p>This memory can then be freed by calling <strong>free_file_entry()</strong>.</p>
+
+<p><strong><em>get_file_entry()</em> is dependendent upon a preceding call to <em>initialize_file_system()</em> found in <em>initialize.h</em></strong></p>
+
+<h2 id="RETURN-VALUE">RETURN VALUE</h2>
+
+<p>On success <em>get_file_entry</em> returns a <em>file_entry</em> union containing the <em>file_header *</em> header corresponding to the NTFS file record header info and <em>unsigned char *</em> content containing the entire NTFS file record. On failure the union is returned with both pointers set to NULL.</p>
+
+<h2 id="NOTES">NOTES</h2>
+
+<p>All headers for the SATA NTFS project can be found in the include directory in the project repo. Compile with <strong>-I./include/</strong>.</p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>SiCore Tech Inc.</li>
+    <li class='tc'>March 2017</li>
+    <li class='tr'>get_file_entry(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
