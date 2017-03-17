@@ -131,7 +131,7 @@ typedef struct {
 
 <h2 id="RETURN-VALUE">RETURN VALUE</h2>
 
-<p>On success <em>get_attribute()</em> returns an <em>attribute</em> union containing <em>attribute_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL and errno is set with the following value :</p>
+<p>On success <em>get_attribute()</em> returns an <em>attribute</em> union containing <em>attribute_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL and <em>errno</em> is set with the following value :</p>
 
 <p><strong>EBADF</strong>
 <em>file_entry</em> is not a valid NTFS file record or is not initialized properly</p>
