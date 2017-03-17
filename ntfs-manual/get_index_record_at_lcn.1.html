@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>get_index_record_at_lcn(1) - reads the NTFS index record at a given Logical Cluster Number </title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#RETURN-VALUE">RETURN VALUE</a>
+    <a href="#NOTES">NOTES</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>get_index_record_at_lcn(1)</li>
+    <li class='tc'>NTFS Manual</li>
+    <li class='tr'>get_index_record_at_lcn(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>get_index_record_at_lcn</code> - <span class="man-whatis">reads the NTFS index record at a given Logical Cluster Number </span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><strong>#include &lt;index_record.h></strong>          /* See NOTES */</p>
+
+<p><strong>index_record get_index_record_at_lcn(unsigned long long <em>lcn</em>);</strong></p>
+
+<p><strong>void free_index_record(index_record <em>ir</em>);</strong></p>
+
+<p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p><strong>get_index_record_at_lcn()</strong> reads the NTFS index record at the Logical Cluster Number (<em>lcn</em>) and stores it in the union <em>index_record</em> defined in <em>index_record.h</em> :</p>
+
+<pre><code class="c">typedef union {
+  index_record_header * header;
+  unsigned char * content;
+} index_record;
+</code></pre>
+
+<p>The <em>index_record_header</em> struct represents the NTFS index record header include the <em>Node header</em> and is also defined in <em>index_record.h</em> along with its sub-struct <em>index_node_header</em> :</p>
+
+<pre><code class="c">typedef struct {
+  unsigned int offset_to_first_index_entry;
+  unsigned int total_size_of_the_index_entries;
+  unsigned int allocated_size_of_the_node;
+  char has_sub_nodes; //non-leaf node flag
+  char padding[3];
+} index_node_header;
+
+typedef struct {
+  char magic_number[4];  //Magic number 'INDX'
+  unsigned short offset_to_the_update_sequence;
+  unsigned short size_in_words_of_the_update_sequence;
+  unsigned long long log_file_sequence_number;
+  unsigned long long vcn_of_this_index_record;
+  index_node_header node;
+} index_record_header;
+</code></pre>
+
+<p>Each call to <em>get_index_record_at_lcn()</em> allocates memory for the <em>index_record_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS ndex record (1 cluster) which is obtained using the <strong>CLUSTER_SIZE_IN_BYTES</strong> macro defined in <em>volume_info.h</em>.</p>
+
+<p>This memory can then be freed by calling <strong>free_index_record()</strong>.</p>
+
+<p><strong><em>get_index_record_at_lcn()</em> is dependendent upon a preceding call to <em>initialize_file_system()</em> found in <em>initialize.h</em></strong></p>
+
+<h2 id="RETURN-VALUE">RETURN VALUE</h2>
+
+<p>On success <em>get_index_record_at_lcn</em> returns an <em>index_record</em> union containing the <em>index_header *</em> header corresponding to the NTFS index record header info and <em>unsigned char *</em> content containing the entire NTFS index record. On failure the union is returned with both pointers set to NULL.</p>
+
+<h2 id="NOTES">NOTES</h2>
+
+<p>All headers for the SATA NTFS project can be found in the include directory in the project repo. Compile with <strong>-I./include/</strong>.</p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'>SiCore Tech Inc.</li>
+    <li class='tc'>March 2017</li>
+    <li class='tr'>get_index_record_at_lcn(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>
