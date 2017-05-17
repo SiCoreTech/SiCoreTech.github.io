@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv='content-type' value='text/html;charset=utf8'>
   <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
-  <title>get_index_entry_by_name_in_directory(1) - searches NTFS File Record (file_entry) index for index entry by name</title>
+  <title>search_directory_for_index_entry(1) - searches NTFS File Record (file_entry) index for index entry by name</title>
   <style type='text/css' media='all'>
   /* style: man */
   body#manpage {margin:0}
@@ -61,29 +61,27 @@
   </div>
 
   <ol class='man-decor man-head man head'>
-    <li class='tl'>get_index_entry_by_name_in_directory(1)</li>
+    <li class='tl'>search_directory_for_index_entry(1)</li>
     <li class='tc'></li>
-    <li class='tr'>get_index_entry_by_name_in_directory(1)</li>
+    <li class='tr'>search_directory_for_index_entry(1)</li>
   </ol>
 
   <h2 id="NAME">NAME</h2>
 <p class="man-name">
-  <code>get_index_entry_by_name_in_directory</code> - <span class="man-whatis">searches NTFS File Record (file_entry) index for index entry by name</span>
+  <code>search_directory_for_index_entry</code> - <span class="man-whatis">searches NTFS File Record (file_entry) index for index entry by name</span>
 </p>
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
 <p><strong>#include &lt;index_record.h></strong>          /* See NOTES */</p>
 
-<p><strong>index_entry get_index_entry_by_name_in_directory(file_entry <em>file</em>, char <em>name[MAX_FILENAME_SIZE]</em>);</strong></p>
-
-<p><strong>void free_index_entry(index_entry <em>ie</em>);</strong></p>
+<p><strong>index_entry search_directory_for_index_entry(file_entry <em>f</em>, char <em>name[MAX_FILENAME_SIZE]</em>, index_record * <em>ir</em>);</strong></p>
 
 <p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
-<p><strong>get_index_entry_by_name_in_directory()</strong> searches NTFS File Record struct <em>file_entry</em> from <em>&lt;file_entry.h> for an index entry with a file name matching </em>name<em> and reads the corresponding bytes into a struct called </em>index_entry<em> as specified in </em>&lt;index_record.h>_ as:</p>
+<p><strong>search_directory_for_index_entry()</strong> searches NTFS File Record struct <em>file_entry</em> from <em>&lt;file_entry.h> for an index entry with a file name matching </em>name<em> and reads the corresponding bytes into a struct called </em>index_entry<em> as specified in </em>&lt;index_record.h>_ as:</p>
 
 <pre><code class="c">typedef struct {
   unsigned long long mft_address_of_parent_directory : 48;
@@ -91,6 +89,7 @@
   unsigned short length_of_the_index_entry;
   unsigned short length_of_the_stream;
   unsigned int flags; //1 index entry points to a sub-node, 2 last index entry in the node
+  unsigned char padding[512]; //Correct invalid readsize
 } index_entry_header;
 
 typedef union {
@@ -99,15 +98,13 @@ typedef union {
 } index_entry;
 </code></pre>
 
-<p>Each call to <em>get_index_entry_by_name_in_directory()</em> allocates memory for the <em>index_entry_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS index entry.</p>
-
-<p>This memory can then be freed by calling <strong>free_index_entry()</strong>.</p>
+<p>The third parameter <em>ir</em> takes in a pointer to an <em>index_record</em> struct and stores the node that the <em>index_entry</em> is found in, this argument can be <em>NULL</em> however this is not recommended for multi-threaded programs.</p>
 
 <p>The argument <em>name</em> has a maximum size of 256 bytes as specified by macro <em>MAX_FILENAME_SIZE</em> found in <em>&lt;index_record.h></em>.</p>
 
 <h2 id="RETURN-VALUE">RETURN VALUE</h2>
 
-<p>On success <em>get_index_entry_by_name_in_directory()</em> returns an <em>index_entry</em> union containing <em>index_entry_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL;</p>
+<p>On success <em>search_directory_for_index_entry()</em> returns an <em>index_entry</em> union containing <em>index_entry_header * header</em> corresponding to the NTFS attribute header info and <em>unsigned char *</em> content containing the entire NTFS attribute. On failure the union is returned with both pointers set to NULL;</p>
 
 <h2 id="NOTES">NOTES</h2>
 
@@ -116,8 +113,8 @@ typedef union {
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'>SiCore Tech Inc.</li>
-    <li class='tc'>April 2017</li>
-    <li class='tr'>get_index_entry_by_name_in_directory(1)</li>
+    <li class='tc'>May 2017</li>
+    <li class='tr'>search_directory_for_index_entry(1)</li>
   </ol>
 
   </div>
