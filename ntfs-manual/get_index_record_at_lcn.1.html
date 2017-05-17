@@ -75,9 +75,7 @@
 
 <p><strong>#include &lt;index_record.h></strong>          /* See NOTES */</p>
 
-<p><strong>index_record get_index_record_at_lcn(unsigned long long <em>lcn</em>);</strong></p>
-
-<p><strong>void free_index_record(index_record <em>ir</em>);</strong></p>
+<p><strong>int get_index_record_at_lcn(index_record * <em>ir</em>, unsigned long long <em>lcn</em>);</strong></p>
 
 <p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
 
@@ -111,9 +109,7 @@ typedef struct {
 } index_record_header;
 </code></pre>
 
-<p>Each call to <em>get_index_record_at_lcn()</em> allocates memory for the <em>index_record_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS ndex record (1 cluster) which is obtained using the <strong>CLUSTER_SIZE_IN_BYTES</strong> macro defined in <em>volume_info.h</em>.</p>
-
-<p>This memory can then be freed by calling <strong>free_index_record()</strong>.</p>
+<p>Each call initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS ndex record (1 cluster) which is obtained using the <strong>CLUSTER_SIZE_IN_BYTES</strong> macro defined in <em>volume_info.h</em>.</p>
 
 <p><strong><em>get_index_record_at_lcn()</em> is dependendent upon a preceding call to <em>initialize_file_system()</em> found in <em>initialize.h</em></strong></p>
 
@@ -128,7 +124,7 @@ typedef struct {
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'>SiCore Tech Inc.</li>
-    <li class='tc'>April 2017</li>
+    <li class='tc'>May 2017</li>
     <li class='tr'>get_index_record_at_lcn(1)</li>
   </ol>
 
