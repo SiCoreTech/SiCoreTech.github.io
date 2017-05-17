@@ -77,8 +77,6 @@
 
 <p><strong>attribute get_attribute(file_entry <em>file</em>, unsigned int <em>type_id</em>);</strong></p>
 
-<p><strong>void free_attribute(attribute <em>a</em>);</strong></p>
-
 <p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
@@ -125,9 +123,7 @@ typedef struct {
 } attribute_header;
 </code></pre>
 
-<p>Each call to <em>get_attribute()</em> allocates memory for the <em>attribute_header *</em> and <em>unsigned char *</em> by calling <em>malloc</em> from <em>stdlib.h</em>. It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS attribute (specified in the generic portion of the header).</p>
-
-<p>This memory can then be freed by calling <strong>free_attribute()</strong>.</p>
+<p>It initializes the <em>unsigned char * content</em> member of the union to the size of the NTFS attribute (specified in the generic portion of the header).</p>
 
 <h2 id="RETURN-VALUE">RETURN VALUE</h2>
 
@@ -145,7 +141,7 @@ typedef struct {
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'>SiCore Tech Inc.</li>
-    <li class='tc'>April 2017</li>
+    <li class='tc'>May 2017</li>
     <li class='tr'>get_attribute(1)</li>
   </ol>
 
