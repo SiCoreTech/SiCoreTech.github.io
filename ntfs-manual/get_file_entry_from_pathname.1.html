@@ -77,9 +77,9 @@
 
 <p><strong>int GetFileEntryFromPathname(file_entry * <em>dir</em>, file_entry * <em>f</em>, char <em>pathname[MAX_FILENAME_SIZE])</em></strong></p>
 
-<h1>define get_file_entry_from_pathname(f, pathname)\</h1>
-
-<p>  GetFileEntryFromPathname(NULL, f, pathname);</p>
+<pre><code class="c">#define get_file_entry_from_pathname(f, pathname)\
+    GetFileEntryFromPathname(NULL, f, pathname);
+</code></pre>
 
 <p>Compile and link with <strong>-DSATA_MEDIATOR</strong> when cross-compiling for SATA Mediator hardware.</p>
 
